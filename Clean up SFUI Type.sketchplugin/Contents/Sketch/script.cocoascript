@@ -1,0 +1,102 @@
+var onRun = function(context) {
+	var selection = context.selection;
+	var doc = context.document;
+	var textLayers = [];
+
+	var trackingTable = {
+		"SFUIText": {
+			"12": 0.492,
+			"16": 0.416,
+			"18": 0.342,
+			"20": 0.24,
+			"22": 0.132,
+			"24": 0,
+			"26": -0.156,
+			"28": -0.308,
+			"30": -0.48,
+			"32": -0.64,
+			"34": -0.816,
+			"36": -0.9
+		},
+		"SFUIDisplay": {
+			"40": 0.76,
+			"44": 0.704,
+			"56": 0.728,
+			"64": 0.768,
+			"72": 0.792,
+			"100": 0.7,
+			"128": 0.384,
+			"160": 0
+		}
+
+	}
+
+
+	var layers = doc.currentPage().children()
+	var loop = [layers objectEnumerator]
+
+	//find all SFUI fonts in your current page:
+	while (layer = [loop nextObject]) {
+		if ([layer className] == "MSTextLayer" && layer.fontPostscriptName().indexOf("SFUI") == 0) {
+			textLayers.push(layer);
+		}
+	}
+
+	if (textLayers.length > 0) {
+
+		for (var j = 0; j < textLayers.length; j++) {
+
+			var textLayer = textLayers[j];
+			var fontName = textLayer.fontPostscriptName();
+			var fontSize = textLayer.fontSize();
+			var fontParts = fontName.match(/([SFUI*]\w+)-([\w*]*)/);
+
+			family = fontParts[1];
+			weight = fontParts[2];
+
+			//Font Should be SFUIDisplay for sizes over 40pt @72dpi		
+			if (fontSize > 36) {
+				family = "SFUIDisplay";
+				fontSize = Math.min(160, Math.max(36, fontSize));
+
+			} else {
+				family = "SFUIText";
+				fontSize = Math.min(36, Math.max(12, fontSize));
+
+			}
+			textLayer.setFontPostscriptName(family + "-" + weight);
+
+
+			//look up the value from the charts,  otherwise use the polynomial regression formulas
+			var spacing = trackingTable[family][fontSize];
+
+
+			if (spacing) {
+				textLayer.characterSpacing = spacing;
+			} else {
+				var interpolatedValue = fontSize > 36 ? spacingForSFUIDisplay(fontSize) : spacingForSFUIText(fontSize);
+				textLayer.characterSpacing = interpolatedValue;
+			}
+
+			//dunno but for some reason sketch's variable scoping seems whack. reset it here.
+			spacing = undefined;
+
+		}
+
+	} else {
+		doc.showMessage("No SF UI text layers Found.");
+	}
+
+	function spacingForSFUIText(fontSize) {
+		var x = fontSize;
+		return 1.8935579785150026e+001 * Math.pow(x, 0) + -2.7361408376937959e+000 * Math.pow(x, 1) + -4.6189583172822424e-001 * Math.pow(x, 2) + 1.5052765513435373e-001 * Math.pow(x, 3) + -1.6287342754985612e-002 * Math.pow(x, 4) + 9.1312054898148257e-004 * Math.pow(x, 5) + -2.6523444175122928e-005 * Math.pow(x, 6) + 2.1100667823122586e-007 * Math.pow(x, 7) + 1.0593955857889227e-008 * Math.pow(x, 8) + -3.6338236763420032e-010 * Math.pow(x, 9) + 4.6153188347551759e-012 * Math.pow(x, 10) + -2.1711560469110898e-014 * Math.pow(x, 11);
+	}
+
+
+	function spacingForSFUIDisplay(fontSize) {
+
+		var x = fontSize;
+		return -7.62256435e-013 * Math.pow(x, 7) + 4.882635806e-010 * Math.pow(x, 6) - 1.305539437e-007 * Math.pow(x, 5) + 1.89342378e-005 * Math.pow(x, 4) - 1.613053602e-003 * Math.pow(x, 3) + 8.079399855e-002 * Math.pow(x, 2) - 2.197596963 * x + 25.65110555;
+	}
+
+};

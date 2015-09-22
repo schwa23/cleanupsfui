@@ -1,0 +1,23 @@
+{
+  "author" : "",
+  "commands" : [
+    {
+      "script" : "script.cocoascript",
+      "handler" : "onRun",
+      "shortcut" : "cmd ctrl t",
+      "name" : "Clean up SFUI Type",
+      "identifier" : "clean up sfui type"
+    }
+  ],
+  "menu" : {
+    "items" : [
+      "clean up sfui type"
+    ],
+    "title" : "Clean up SFUI Type"
+  },
+  "identifier" : "com.schwa23.cleanupsfuitype",
+  "version" : "1.0",
+  "description" : "Clean up usage of SF UI font per Apple's recommended guidelines",
+  "authorEmail" : "josh@uncleleron.com",
+  "name" : "Clean Up SFUI Type"
+}
