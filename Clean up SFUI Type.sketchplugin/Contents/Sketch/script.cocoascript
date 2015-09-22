@@ -84,7 +84,7 @@ var onRun = function(context) {
 		}
 
 	} else {
-		doc.showMessage("No SF UI text layers Found.");
+		doc.showMessage("No SF UI text layers found.");
 	}
 
 	function spacingForSFUIText(fontSize) {
