@@ -49,23 +49,25 @@ var onRun = function(context) {
 			var textLayer = textLayers[j];
 			var fontName = textLayer.fontPostscriptName();
 			var fontSize = textLayer.fontSize();
-			var fontParts = fontName.match(/([SFUI*]\w+)-([\w*]*)/);
 
-			family = fontParts[1];
+			var fontParts = fontName.match(/([SFUI*]\w+)-([\w*]*)/);
+			var recommendedFamily, family = fontParts[1];
 			weight = fontParts[2];
+			// log("family: " + family);
 
 			//Font Should be SFUIDisplay for sizes over 40pt @72dpi		
 			if (fontSize > 36) {
-				family = "SFUIDisplay";
+				recommendedFamily = "SFUIDisplay";
 				fontSize = Math.min(160, Math.max(36, fontSize));
 
 			} else {
-				family = "SFUIText";
+				recommendedFamily = "SFUIText";
 				fontSize = Math.min(36, Math.max(12, fontSize));
 
 			}
-			textLayer.setFontPostscriptName(family + "-" + weight);
-
+			if (recommendedFamily != family) {
+				textLayer.setFontPostscriptName(family + "-" + weight);
+			}
 
 			//look up the value from the charts,  otherwise use the polynomial regression formulas
 			var spacing = trackingTable[family][fontSize];
@@ -84,20 +86,19 @@ var onRun = function(context) {
 		}
 
 	} else {
-		doc.showMessage("No SF UI text layers found.");
+		doc.showMessage("No SFUI text layers Found.");
 	}
 
 	function spacingForSFUIText(fontSize) {
-		//solve for X using a polynomial regression equation based on the tracking tables
 		var x = fontSize;
 		return 1.8935579785150026e+001 * Math.pow(x, 0) + -2.7361408376937959e+000 * Math.pow(x, 1) + -4.6189583172822424e-001 * Math.pow(x, 2) + 1.5052765513435373e-001 * Math.pow(x, 3) + -1.6287342754985612e-002 * Math.pow(x, 4) + 9.1312054898148257e-004 * Math.pow(x, 5) + -2.6523444175122928e-005 * Math.pow(x, 6) + 2.1100667823122586e-007 * Math.pow(x, 7) + 1.0593955857889227e-008 * Math.pow(x, 8) + -3.6338236763420032e-010 * Math.pow(x, 9) + 4.6153188347551759e-012 * Math.pow(x, 10) + -2.1711560469110898e-014 * Math.pow(x, 11);
 	}
 
 
 	function spacingForSFUIDisplay(fontSize) {
-		//solve for X using a polynomial regression equation based on the tracking tables 
+
 		var x = fontSize;
-		return 5.1181664913238905e+000 * x ^ 0 + -2.7642839765513338e-001 * x ^ 1 + 6.4352818811802791e-003 * x ^ 2 + -6.9066800237127681e-005 * x ^ 3 + 3.4504507842382884e-007 * x ^ 4 + -6.5673837099194685e-010 * x ^ 5
+		return -7.62256435e-013 * Math.pow(x, 7) + 4.882635806e-010 * Math.pow(x, 6) - 1.305539437e-007 * Math.pow(x, 5) + 1.89342378e-005 * Math.pow(x, 4) - 1.613053602e-003 * Math.pow(x, 3) + 8.079399855e-002 * Math.pow(x, 2) - 2.197596963 * x + 25.65110555;
 	}
 
 };
