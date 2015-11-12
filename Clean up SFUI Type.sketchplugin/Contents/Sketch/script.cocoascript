@@ -38,53 +38,59 @@ var onRun = function(context) {
 	//find all SFUI fonts in your current page:
 	while (layer = [loop nextObject]) {
 		if ([layer className] == "MSTextLayer" && layer.fontPostscriptName().indexOf("SFUI") == 0) {
+			
 			textLayers.push(layer);
 		}
 	}
 
 	if (textLayers.length > 0) {
-
+		
 		for (var j = 0; j < textLayers.length; j++) {
 
 			var textLayer = textLayers[j];
 			var fontName = textLayer.fontPostscriptName();
 			var fontSize = textLayer.fontSize();
-			var fontParts = fontName.match(/([SFUI*]\w+)-([\w*]*)/);
 
-			family = fontParts[1];
+			var fontParts = fontName.match(/([SFUI*]\w+)-([\w*]*)/);
+			var recommendedFamily, family = fontParts[1];
 			weight = fontParts[2];
+			// log("family: " + family);
 
 			//Font Should be SFUIDisplay for sizes over 40pt @72dpi		
 			if (fontSize > 36) {
-				family = "SFUIDisplay";
+				recommendedFamily = "SFUIDisplay";
 				fontSize = Math.min(160, Math.max(36, fontSize));
+		
 
 			} else {
-				family = "SFUIText";
+				recommendedFamily = "SFUIText";
 				fontSize = Math.min(36, Math.max(12, fontSize));
+				
 
 			}
-			textLayer.setFontPostscriptName(family + "-" + weight);
-
+			if (recommendedFamily != family) {
+				textLayer.setFontPostscriptName(recommendedFamily + "-" + weight);
+				family = recommendedFamily;
+			}
 
 			//look up the value from the charts,  otherwise use the polynomial regression formulas
 			var spacing = trackingTable[family][fontSize];
 
-
+			// log("Before spacing: " + textLayer.characterSpacing())
 			if (spacing) {
 				textLayer.characterSpacing = spacing;
 			} else {
 				var interpolatedValue = fontSize > 36 ? spacingForSFUIDisplay(fontSize) : spacingForSFUIText(fontSize);
 				textLayer.characterSpacing = interpolatedValue;
 			}
-
+			// log("After spacing: " + textLayer.characterSpacing())
 			//dunno but for some reason sketch's variable scoping seems whack. reset it here.
 			spacing = undefined;
 
 		}
 
 	} else {
-		doc.showMessage("No SF UI text layers Found.");
+		doc.showMessage("No SFUI text layers Found.");
 	}
 
 	function spacingForSFUIText(fontSize) {
