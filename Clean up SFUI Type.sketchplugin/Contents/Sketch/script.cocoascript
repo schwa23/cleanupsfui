@@ -56,13 +56,13 @@ var onRun = function(context) {
 			// log("family: " + family);
 
 			//Font Should be SFUIDisplay for sizes over 40pt @72dpi		
-			if (fontSize > 36) {
+			if (fontSize >= 40) {
 				recommendedFamily = "SFUIDisplay";
-				fontSize = Math.min(160, Math.max(36, fontSize));
+				fontSize = Math.min(160, Math.max(40, fontSize));
 
 			} else {
 				recommendedFamily = "SFUIText";
-				fontSize = Math.min(36, Math.max(12, fontSize));
+				fontSize = Math.min(40, Math.max(12, fontSize));
 
 			}
 			if (recommendedFamily != family) {
@@ -76,7 +76,7 @@ var onRun = function(context) {
 			if (spacing) {
 				textLayer.characterSpacing = spacing;
 			} else {
-				var interpolatedValue = fontSize > 36 ? spacingForSFUIDisplay(fontSize) : spacingForSFUIText(fontSize);
+				var interpolatedValue = fontSize >= 40 ? spacingForSFUIDisplay(fontSize) : spacingForSFUIText(fontSize);
 				textLayer.characterSpacing = interpolatedValue;
 			}
 
