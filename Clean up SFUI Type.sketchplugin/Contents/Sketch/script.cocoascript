@@ -38,12 +38,13 @@ var onRun = function(context) {
 	//find all SFUI fonts in your current page:
 	while (layer = [loop nextObject]) {
 		if ([layer className] == "MSTextLayer" && layer.fontPostscriptName().indexOf("SFUI") == 0) {
+			
 			textLayers.push(layer);
 		}
 	}
 
 	if (textLayers.length > 0) {
-
+		
 		for (var j = 0; j < textLayers.length; j++) {
 
 			var textLayer = textLayers[j];
@@ -66,20 +67,21 @@ var onRun = function(context) {
 
 			}
 			if (recommendedFamily != family) {
-				textLayer.setFontPostscriptName(family + "-" + weight);
+				textLayer.setFontPostscriptName(recommendedFamily + "-" + weight);
+				family = recommendedFamily;
 			}
 
 			//look up the value from the charts,  otherwise use the polynomial regression formulas
 			var spacing = trackingTable[family][fontSize];
 
-
+			// log("Before spacing: " + textLayer.characterSpacing())
 			if (spacing) {
 				textLayer.characterSpacing = spacing;
 			} else {
 				var interpolatedValue = fontSize >= 40 ? spacingForSFUIDisplay(fontSize) : spacingForSFUIText(fontSize);
 				textLayer.characterSpacing = interpolatedValue;
 			}
-
+			// log("After spacing: " + textLayer.characterSpacing())
 			//dunno but for some reason sketch's variable scoping seems whack. reset it here.
 			spacing = undefined;
 
