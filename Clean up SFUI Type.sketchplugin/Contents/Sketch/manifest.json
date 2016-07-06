@@ -13,7 +13,7 @@
     "items" : [
       "clean up sfui type"
     ],
-    "title" : "Clean up SFUI Type"
+    "isRoot": true
   },
   "identifier" : "com.schwa23.cleanupsfuitype",
   "version" : "1.0",
