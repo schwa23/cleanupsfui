@@ -11,6 +11,6 @@ Finds all SFUI fonts and updates the character spacing, based on the tracking va
 
 Because the values provided by Apple are not exhaustive, for font sizes that are not defined explicitly, the spacing is approximated using a polynomial regression.
 
-##Important Note##
-The current implmentation assumes you are designing @2x resolution, with measurements in pixels (where 2 pixels = one point @1x). I may update it at some point but since I work @2x 99% of the time this is what I've optimized for.
+##Updated 7/6/2016##
+By popular demand, I've added support for people who design @1x. The first time you run the script it will ask you once what resolution you design in. You can always change this by running "Set Default Design Resolution".
 
