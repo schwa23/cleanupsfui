@@ -16,7 +16,7 @@
     "isRoot": true
   },
   "identifier" : "com.schwa23.cleanupsfuitype",
-  "version" : "1.0",
+  "version" : "1.0.1",
   "description" : "Clean up usage of SF UI font per Apple's recommended guidelines",
   "authorEmail" : "josh@uncleleron.com",
   "name" : "Clean Up SFUI Type"
