@@ -1,4 +1,33 @@
-var onRun = function(context) {
+@import "lib/pluginDefaults.js"
+
+
+
+var userDefaults = initDefaults("com.schwa23.cleanupsfui", {hasRunOnce: false, scale: 1})
+
+var cleanUp1x = function(context) {
+	
+	// print("cleaning up @1x")
+	onRun(context, 2)
+}
+
+var cleanUp = function(context) {
+	// print("cleaning up @2x")
+	
+	onRun(context, 1)
+	
+}
+
+var onRun = function(context, scale) {
+	
+	if(!scale) {
+		scale = 2
+	}
+	
+	setDefaultScale()
+	
+	scale = userDefaults.scale
+	
+	// print("Scale = " + scale);
 	var selection = context.selection;
 	var doc = context.document;
 	var textLayers = [];
@@ -49,8 +78,12 @@ var onRun = function(context) {
 
 			var textLayer = textLayers[j];
 			var fontName = textLayer.fontPostscriptName();
-			var fontSize = textLayer.fontSize();
+			var fontSize = textLayer.fontSize()
+			
+			// print("Font size = " + fontSize)
+			fontSize = fontSize * (scale);
 
+			// print("Scaled font size = " + fontSize)
 			var fontParts = fontName.match(/([SFUI*]\w+)-([\w*]*)/);
 			var recommendedFamily, family = fontParts[1];
 			weight = fontParts[2];
@@ -76,10 +109,10 @@ var onRun = function(context) {
 
 			// log("Before spacing: " + textLayer.characterSpacing())
 			if (spacing) {
-				textLayer.characterSpacing = spacing;
+				textLayer.characterSpacing = spacing * (1/scale);
 			} else {
 				var interpolatedValue = fontSize >= 40 ? spacingForSFUIDisplay(fontSize) : spacingForSFUIText(fontSize);
-				textLayer.characterSpacing = interpolatedValue;
+				textLayer.characterSpacing = interpolatedValue * (1/scale);
 			}
 			// log("After spacing: " + textLayer.characterSpacing())
 			//dunno but for some reason sketch's variable scoping seems whack. reset it here.
@@ -104,3 +137,76 @@ var onRun = function(context) {
 	}
 
 };
+
+
+
+
+var resetDefaultScale = function() {
+	userDefaults.hasRunOnce = false
+	saveDefaults(userDefaults)
+	setDefaultScale();
+}
+
+var setDefaultScale = function() {
+	if(userDefaults["hasRunOnce"] === false) {
+	
+	// print(userDefaults)
+	var scale = resolutionSetting()
+		if(scale){
+			userDefaults.scale = scale
+			userDefaults.hasRunOnce = true
+			saveDefaults(userDefaults)
+			}
+	}
+	print (scale)
+}
+
+var resolutionSetting = function(){
+        var allResolution =[
+        {
+            name: "Retina@2x (2px = 1pt)",
+            scale: 1
+        },    
+        {
+            name: "Non-retina@1x (1px = 1pt)",
+            scale: 2
+        }
+        ]
+        var self = this;
+        var cellWidth = 300;
+        var rowHeight = 26;
+        var cellHeight = rowHeight * allResolution.length;
+
+        var accessory = NSView.alloc().initWithFrame(NSMakeRect(0, 0, cellWidth, cellHeight + 30));
+        var matrix = [[NSMatrix alloc] initWithFrame:NSMakeRect(0, 30, cellWidth, cellHeight)
+            mode:NSRadioModeMatrix
+            cellClass:[NSButtonCell class]
+            numberOfRows: allResolution.length
+            numberOfColumns:1
+        ];
+        matrix.setCellSize(NSMakeSize(cellWidth, 25))
+
+        allResolution.forEach(function(data, i) {
+            var cell = matrix.cells()[i]
+            cell.setButtonType(NSRadioButton);
+            cell.setTitle(data.name);
+            cell.setTag(i);
+        });
+
+        [accessory addSubview:matrix]
+
+        var alert = NSAlert.alloc().init();
+        alert.setMessageText(("Resolution setup"));
+        alert.setInformativeText(("Choose the resolution you design in:"));
+        alert.addButtonWithTitle(("OK"));
+        alert.addButtonWithTitle(("Cancel"));
+        alert.setAccessoryView(accessory);
+
+        var buttonReturnValue = [alert runModal],
+            selectedIndex = [[matrix selectedCell] tag];
+
+        if (buttonReturnValue === NSAlertFirstButtonReturn) {
+            return allResolution[selectedIndex].scale;
+        }
+        return false;
+    }

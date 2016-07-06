@@ -3,20 +3,27 @@
   "commands" : [
     {
       "script" : "script.cocoascript",
-      "handler" : "onRun",
+      "handler" : "cleanUp",
       "shortcut" : "cmd ctrl t",
       "name" : "Clean up SFUI Type",
       "identifier" : "clean up sfui type"
+    },
+    {
+      "script" : "script.cocoascript",
+      "handler" : "resetDefaultScale",
+      "name" : "Set Default Design Resolution",
+      "identifier" : "reset-default-scale"
     }
   ],
   "menu" : {
     "items" : [
-      "clean up sfui type"
-    ],
-    "isRoot": true
+      "clean up sfui type",
+	  "reset-default-scale"
+    ]
+	
   },
   "identifier" : "com.schwa23.cleanupsfuitype",
-  "version" : "1.0.1",
+  "version" : "1.1",
   "description" : "Clean up usage of SF UI font per Apple's recommended guidelines",
   "authorEmail" : "josh@uncleleron.com",
   "name" : "Clean Up SFUI Type"
