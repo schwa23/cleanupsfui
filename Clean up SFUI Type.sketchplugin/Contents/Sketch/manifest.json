@@ -1,30 +1,30 @@
 {
-  "author" : "",
+  "author" : "Joshua Dickens",
   "commands" : [
     {
+      "name" : "Clean Up SF Type",
       "script" : "script.cocoascript",
       "handler" : "cleanUp",
       "shortcut" : "cmd ctrl t",
-      "name" : "Clean up SFUI Type",
       "identifier" : "clean up sfui type"
     },
     {
+      "name" : "Set Default Design Resolution",
       "script" : "script.cocoascript",
       "handler" : "resetDefaultScale",
-      "name" : "Set Default Design Resolution",
-      "identifier" : "reset-default-scale"
+      "identifier" : "reset default scale"
     }
   ],
   "menu" : {
+	"title": "Clean UP SFUI Type",
     "items" : [
       "clean up sfui type",
-	  "reset-default-scale"
+	    "reset default scale"
     ]
-	
   },
   "identifier" : "com.schwa23.cleanupsfuitype",
-  "version" : "1.1",
-  "description" : "Clean up usage of SF UI font per Apple's recommended guidelines",
+  "version" : "1.3",
+  "description" : "Clean up usage of SF font per Apple's recommended guidelines",
   "authorEmail" : "josh@uncleleron.com",
-  "name" : "Clean Up SFUI Type"
+  "name" : "Clean Up SF Type"
 }

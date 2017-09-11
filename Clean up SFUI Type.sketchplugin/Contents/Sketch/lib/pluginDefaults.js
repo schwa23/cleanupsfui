@@ -1,5 +1,3 @@
-
-
 var kPluginDomain;
 
 var initDefaults = function(pluginDomain, initialValues) {
@@ -27,4 +25,3 @@ var saveDefaults = function(newValues) {
 		[defaults setObject: newValues forKey: kPluginDomain];
 	}
 }
-

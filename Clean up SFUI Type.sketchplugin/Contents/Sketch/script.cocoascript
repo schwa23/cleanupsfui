@@ -1,140 +1,160 @@
 @import "lib/pluginDefaults.js"
 
-
-
-var userDefaults = initDefaults("com.schwa23.cleanupsfui", {hasRunOnce: false, scale: 1})
+var userDefaults = initDefaults("com.schwa23.cleanupsfui", {
+  hasRunOnce: false,
+  scale: 1
+})
 
 var cleanUp1x = function(context) {
-	
-	// print("cleaning up @1x")
-	onRun(context, 2)
+
+  // print("cleaning up @1x")
+  onRun(context, 2);
 }
 
 var cleanUp = function(context) {
-	// print("cleaning up @2x")
-	
-	onRun(context, 1)
-	
+  // print("cleaning up @2x")
+
+  onRun(context, 1);
+
 }
 
 var onRun = function(context, scale) {
-	
-	if(!scale) {
-		scale = 2
-	}
-	
-	setDefaultScale()
-	
-	scale = userDefaults.scale
-	
-	// print("Scale = " + scale);
-	var selection = context.selection;
-	var doc = context.document;
-	var textLayers = [];
 
-	var trackingTable = {
-		"SFUIText": {
-			"12": 0.492,
-			"16": 0.416,
-			"18": 0.342,
-			"20": 0.24,
-			"22": 0.132,
-			"24": 0,
-			"26": -0.156,
-			"28": -0.308,
-			"30": -0.48,
-			"32": -0.64,
-			"34": -0.816,
-			"36": -0.9
-		},
-		"SFUIDisplay": {
-			"40": 0.76,
-			"44": 0.704,
-			"56": 0.728,
-			"64": 0.768,
-			"72": 0.792,
-			"100": 0.7,
-			"128": 0.384,
-			"160": 0
-		}
+  if (!scale) {
+    scale = 2
+  }
 
-	}
+  setDefaultScale()
 
+  scale = userDefaults.scale
 
-	var layers = doc.currentPage().children()
-	var loop = [layers objectEnumerator]
+  // print("Scale = " + scale);
+  var selection = context.selection;
+  var doc = context.document;
+  var textLayers = [];
 
-	//find all SFUI fonts in your current page:
-	while (layer = [loop nextObject]) {
-		if ([layer className] == "MSTextLayer" && layer.fontPostscriptName().indexOf("SFUI") == 0) {
-			
-			textLayers.push(layer);
-		}
-	}
+  var trackingTable = {
+    "SFUIText": {
+      "12": 0.492,
+      "16": 0.416,
+      "18": 0.342,
+      "20": 0.24,
+      "22": 0.132,
+      "24": 0,
+      "26": -0.156,
+      "28": -0.308,
+      "30": -0.48,
+      "32": -0.64,
+      "34": -0.816,
+      "36": -0.9,
+      "38": -0.988
+    },
+    "SFUIDisplay": {
+      "40": 0.76,
+      "42": 0.714,
+      "44": 0.704,
+      "48": 0.72,
+      "50": 0.7,
+      "54": 0.756,
+      "56": 0.728,
+      "64": 0.768,
+      "72": 0.792,
+      "96": 0.768,
+      "100": 0.7,
+      "128": 0.384,
+      "130": 0.39,
+      "138": 0.276,
+      "160": 0
+    }
 
-	if (textLayers.length > 0) {
-		
-		for (var j = 0; j < textLayers.length; j++) {
+  }
 
-			var textLayer = textLayers[j];
-			var fontName = textLayer.fontPostscriptName();
-			var fontSize = textLayer.fontSize()
-			
-			// print("Font size = " + fontSize)
-			fontSize = fontSize * (scale);
-
-			// print("Scaled font size = " + fontSize)
-			var fontParts = fontName.match(/([SFUI*]\w+)-([\w*]*)/);
-			var recommendedFamily, family = fontParts[1];
-			weight = fontParts[2];
-			// log("family: " + family);
-
-			//Font Should be SFUIDisplay for sizes over 40pt @72dpi		
-			if (fontSize >= 40) {
-				recommendedFamily = "SFUIDisplay";
-				fontSize = Math.min(160, Math.max(40, fontSize));
-
-			} else {
-				recommendedFamily = "SFUIText";
-				fontSize = Math.min(40, Math.max(12, fontSize));
-
-			}
-			if (recommendedFamily != family) {
-				textLayer.setFontPostscriptName(recommendedFamily + "-" + weight);
-				family = recommendedFamily;
-			}
-
-			//look up the value from the charts,  otherwise use the polynomial regression formulas
-			var spacing = trackingTable[family][fontSize];
-
-			// log("Before spacing: " + textLayer.characterSpacing())
-			if (spacing) {
-				textLayer.characterSpacing = spacing * (1/scale);
-			} else {
-				var interpolatedValue = fontSize >= 40 ? spacingForSFUIDisplay(fontSize) : spacingForSFUIText(fontSize);
-				textLayer.characterSpacing = interpolatedValue * (1/scale);
-			}
-			// log("After spacing: " + textLayer.characterSpacing())
-			//dunno but for some reason sketch's variable scoping seems whack. reset it here.
-			spacing = undefined;
-
-		}
-
-	} else {
-		doc.showMessage("No SFUI text layers Found.");
-	}
-
-	function spacingForSFUIText(fontSize) {
-		var x = fontSize;
-		return 1.8935579785150026e+001 * Math.pow(x, 0) + -2.7361408376937959e+000 * Math.pow(x, 1) + -4.6189583172822424e-001 * Math.pow(x, 2) + 1.5052765513435373e-001 * Math.pow(x, 3) + -1.6287342754985612e-002 * Math.pow(x, 4) + 9.1312054898148257e-004 * Math.pow(x, 5) + -2.6523444175122928e-005 * Math.pow(x, 6) + 2.1100667823122586e-007 * Math.pow(x, 7) + 1.0593955857889227e-008 * Math.pow(x, 8) + -3.6338236763420032e-010 * Math.pow(x, 9) + 4.6153188347551759e-012 * Math.pow(x, 10) + -2.1711560469110898e-014 * Math.pow(x, 11);
-	}
+  //use same values for SFUi & SFPro
+  trackingTable["SFProText"] = trackingTable["SFUIText"];
+  trackingTable["SFProDisplay"] = trackingTable["SFUIDisplay"];
 
 
-	function spacingForSFUIDisplay(fontSize) {
+  var layers = doc.currentPage().children()
+  var loop = [layers objectEnumerator]
 
-		var x = fontSize;
-		return -7.62256435e-013 * Math.pow(x, 7) + 4.882635806e-010 * Math.pow(x, 6) - 1.305539437e-007 * Math.pow(x, 5) + 1.89342378e-005 * Math.pow(x, 4) - 1.613053602e-003 * Math.pow(x, 3) + 8.079399855e-002 * Math.pow(x, 2) - 2.197596963 * x + 25.65110555;
-	}
+  //find all SFUI fonts in your current page:
+  while (layer = [loop nextObject]) {
+
+    if ([layer className] == "MSTextLayer") {
+      var theFontName = layer.fontPostscriptName();
+      if (theFontName.indexOf("SFUI") == 0 || theFontName.indexOf("SFPro") == 0) {
+        textLayers.push(layer);
+      }
+    }
+  }
+
+  if (textLayers.length > 0) {
+
+    for (var j = 0; j < textLayers.length; j++) {
+
+      var textLayer = textLayers[j];
+      var fontName = textLayer.fontPostscriptName();
+      var fontSize = textLayer.fontSize()
+
+      // print("Font size = " + fontSize)
+      fontSize = fontSize * (scale);
+
+      // print("Scaled font size = " + fontSize)
+      var fontParts = fontName.match(/(SF)([(UI)|(Pro)]+)\w+-([\w*]*)/);
+      log(fontParts);
+
+      //Fmamily = SF, version = UI vs Pro, weight = Regular, Light, etc
+      var recommendedFamily, family = fontParts[1] + fontParts[2],
+        version = fontParts[2];
+      weight = fontParts[3];
+      // log("family: " + family);
+
+      //Font Should be SFUIDisplay for sizes over 40pt @72dpi
+      if (fontSize >= 40) {
+        recommendedFamily = "SF" + version + "Display";
+        fontSize = Math.min(160, Math.max(40, fontSize));
+
+      } else {
+        recommendedFamily = "SF" + version + "Text";
+        fontSize = Math.min(40, Math.max(12, fontSize));
+
+      }
+      if (recommendedFamily != family) {
+        textLayer.setFontPostscriptName(recommendedFamily + "-" + weight);
+        family = recommendedFamily;
+      }
+
+      //look up the value from the charts,  otherwise use the polynomial regression formulas
+      var spacing = trackingTable[family][fontSize];
+
+      // log("Before spacing: " + textLayer.characterSpacing())
+      if (spacing) {
+        textLayer.characterSpacing = spacing * (1 / scale);
+      } else {
+        var interpolatedValue = fontSize >= 40 ? spacingForSFUIDisplay(fontSize) : spacingForSFUIText(fontSize);
+        textLayer.characterSpacing = interpolatedValue * (1 / scale);
+      }
+      // log("After spacing: " + textLayer.characterSpacing())
+      //dunno but for some reason sketch's variable scoping seems whack. reset it here.
+      spacing = undefined;
+
+    }
+
+  } else {
+    doc.showMessage("No SF text layers Found.");
+  }
+
+  function spacingForSFUIText(fontSize) {
+    var x = fontSize;
+    return 1.8935579785150026e+001 * Math.pow(x, 0) + -2.7361408376937959e+000 * Math.pow(x, 1) + -4.6189583172822424e-001 * Math.pow(x, 2) + 1.5052765513435373e-001 * Math.pow(x, 3) + -1.6287342754985612e-002 * Math.pow(x, 4) + 9.1312054898148257e-004 * Math.pow(x, 5) + -2.6523444175122928e-005 * Math.pow(x, 6) + 2.1100667823122586e-007 * Math.pow(x, 7) + 1.0593955857889227e-008 * Math.pow(x, 8) + -3.6338236763420032e-010 * Math.pow(x, 9) + 4.6153188347551759e-012 * Math.pow(x, 10) + -2.1711560469110898e-014 * Math.pow(x, 11);
+  }
+
+
+  function spacingForSFUIDisplay(fontSize) {
+
+    var x = fontSize;
+    return -7.62256435e-013 * Math.pow(x, 7) + 4.882635806e-010 * Math.pow(x, 6) - 1.305539437e-007 * Math.pow(x, 5) + 1.89342378e-005 * Math.pow(x, 4) - 1.613053602e-003 * Math.pow(x, 3) + 8.079399855e-002 * Math.pow(x, 2) - 2.197596963 * x + 25.65110555;
+  }
 
 };
 
@@ -142,71 +162,76 @@ var onRun = function(context, scale) {
 
 
 var resetDefaultScale = function() {
-	userDefaults.hasRunOnce = false
-	saveDefaults(userDefaults)
-	setDefaultScale();
+  userDefaults.hasRunOnce = false
+  saveDefaults(userDefaults)
+  setDefaultScale();
 }
 
 var setDefaultScale = function() {
-	if(userDefaults["hasRunOnce"] === false) {
-	
-	// print(userDefaults)
-	var scale = resolutionSetting()
-		if(scale){
-			userDefaults.scale = scale
-			userDefaults.hasRunOnce = true
-			saveDefaults(userDefaults)
-			}
-	}
-	print (scale)
+  if (userDefaults["hasRunOnce"] === false) {
+
+    // print(userDefaults)
+    var scale = resolutionSetting()
+    if (scale) {
+      userDefaults.scale = scale
+      userDefaults.hasRunOnce = true
+      saveDefaults(userDefaults)
+    }
+  }
+  print(scale)
 }
 
-var resolutionSetting = function(){
-        var allResolution =[
-        {
-            name: "Retina@2x (2px = 1pt)",
-            scale: 1
-        },    
-        {
-            name: "Non-retina@1x (1px = 1pt)",
-            scale: 2
-        }
-        ]
-        var self = this;
-        var cellWidth = 300;
-        var rowHeight = 26;
-        var cellHeight = rowHeight * allResolution.length;
-
-        var accessory = NSView.alloc().initWithFrame(NSMakeRect(0, 0, cellWidth, cellHeight + 30));
-        var matrix = [[NSMatrix alloc] initWithFrame:NSMakeRect(0, 30, cellWidth, cellHeight)
-            mode:NSRadioModeMatrix
-            cellClass:[NSButtonCell class]
-            numberOfRows: allResolution.length
-            numberOfColumns:1
-        ];
-        matrix.setCellSize(NSMakeSize(cellWidth, 25))
-
-        allResolution.forEach(function(data, i) {
-            var cell = matrix.cells()[i]
-            cell.setButtonType(NSRadioButton);
-            cell.setTitle(data.name);
-            cell.setTag(i);
-        });
-
-        [accessory addSubview:matrix]
-
-        var alert = NSAlert.alloc().init();
-        alert.setMessageText(("Resolution setup"));
-        alert.setInformativeText(("Choose the resolution you design in:"));
-        alert.addButtonWithTitle(("OK"));
-        alert.addButtonWithTitle(("Cancel"));
-        alert.setAccessoryView(accessory);
-
-        var buttonReturnValue = [alert runModal],
-            selectedIndex = [[matrix selectedCell] tag];
-
-        if (buttonReturnValue === NSAlertFirstButtonReturn) {
-            return allResolution[selectedIndex].scale;
-        }
-        return false;
+var resolutionSetting = function() {
+  var allResolution = [{
+      name: "Retina@2x (2px = 1pt)",
+      scale: 1
+    },
+    {
+      name: "Non-retina@1x (1px = 1pt)",
+      scale: 2
     }
+  ]
+  var self = this;
+  var cellWidth = 300;
+  var rowHeight = 26;
+  var cellHeight = rowHeight * allResolution.length;
+  var frame = NSMakeRect(0, 0, cellWidth, cellHeight + 30);
+  var accessory = NSView.alloc().initWithFrame(frame);
+
+
+  var buttonFormat = NSButtonCell.alloc().init();
+  buttonFormat.setButtonType(NSRadioButton);
+
+  var matrix = NSMatrix.alloc().initWithFrame_mode_prototype_numberOfRows_numberOfColumns(
+    NSMakeRect(0, 30, cellWidth, cellHeight),
+    NSRadioModeMatrix,
+    buttonFormat,
+    2,
+    1
+  );
+  matrix.setCellSize(NSMakeSize(cellWidth, 25))
+
+  allResolution.forEach(function(data, i) {
+    var cell = matrix.cells()[i]
+    cell.setButtonType(NSRadioButton);
+    cell.setTitle(data.name);
+    cell.setTag(i);
+  });
+
+  [accessory addSubview: matrix]
+
+  var alert = NSAlert.alloc().init();
+  alert.setMessageText(("Resolution setup"));
+  alert.setInformativeText(("Choose the resolution you design in:"));
+  alert.addButtonWithTitle(("OK"));
+  alert.addButtonWithTitle(("Cancel"));
+  alert.setAccessoryView(accessory);
+
+  var buttonReturnValue = [alert runModal],
+    selectedIndex = matrix.selectedCell().tag;
+
+  if (buttonReturnValue === NSAlertFirstButtonReturn) {
+    return allResolution[selectedIndex].scale;
+  }
+  return false;
+}
