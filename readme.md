@@ -10,7 +10,7 @@ Finds all SF UI or SF Pro fonts and updates the character spacing, based on the 
 Because the values provided by Apple are not exhaustive, for font sizes that are not defined explicitly, the spacing is approximated using a polynomial regression.
 
 ## Updated 9/19/2017
-Added support for mixed-style text layers, so things like font weight and character spacing are respected. 
+Added support for mixed-style text layers, so things like font weight and character spacing are respected.
 
 ## Updated 9/11/2017
 Added support for SF Pro font (the new default font in iOS 11), along with additional tracking values. Note, for backwards compatibility it will leave existing SF UI fonts unchanged.
