@@ -23,7 +23,7 @@
     ]
   },
   "identifier" : "com.schwa23.cleanupsfuitype",
-  "version" : "1.5.0",
+  "version" : "1.5.1",
   "description" : "Clean up usage of SF font per Apple's recommended guidelines",
   "authorEmail" : "josh@uncleleron.com",
   "name" : "Clean Up SF Type",
