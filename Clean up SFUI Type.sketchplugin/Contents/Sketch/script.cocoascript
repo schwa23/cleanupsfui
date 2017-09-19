@@ -145,7 +145,7 @@ var onRun = function(context, scale) {
         textStorage.addAttribute_value_range(NSKernAttributeName, characterSpacing, range);
 
         var newAttributes = textStorage.fontAttributesInRange(range);
-        textLayer.setAttributes_forRange(newAttributes, range);
+        textLayer.addAttributes_forRange(newAttributes, range);
       }
 
       spacing = undefined;
