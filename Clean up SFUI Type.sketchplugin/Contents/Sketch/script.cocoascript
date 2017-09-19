@@ -215,8 +215,10 @@ var resolutionSetting = function() {
     var cell = matrix.cells()[i]
     cell.setButtonType(NSRadioButton);
     cell.setTitle(data.name);
-    cell.setTag(i);
+    cell.setTag(data.scale);
   });
+  //select the last used scale
+   matrix.selectCellWithTag(userDefaults.scale)
 
   [accessory addSubview: matrix]
 
@@ -227,11 +229,10 @@ var resolutionSetting = function() {
   alert.addButtonWithTitle(("Cancel"));
   alert.setAccessoryView(accessory);
 
-  var buttonReturnValue = [alert runModal],
-    selectedIndex = matrix.selectedCell().tag;
+  var buttonReturnValue = [alert runModal];
 
   if (buttonReturnValue === NSAlertFirstButtonReturn) {
-    return allResolution[selectedIndex].scale;
+    return matrix.selectedCell().tag();
   }
   return false;
 }
