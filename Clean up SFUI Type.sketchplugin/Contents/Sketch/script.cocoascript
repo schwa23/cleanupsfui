@@ -1,5 +1,6 @@
 @import "lib/pluginDefaults.js"
 
+
 var userDefaults = initDefaults("com.schwa23.cleanupsfui", {
   hasRunOnce: false,
   scale: 1
@@ -93,49 +94,60 @@ var onRun = function(context, scale) {
     for (var j = 0; j < textLayers.length; j++) {
 
       var textLayer = textLayers[j];
-      var fontName = textLayer.fontPostscriptName();
-      var fontSize = textLayer.fontSize()
 
-      // print("Font size = " + fontSize)
-      fontSize = fontSize * (scale);
+      var textStorage = textLayer.immutableModelObject().createTextStorage()
+      var attributeRuns = textStorage.attributeRuns();
+      var attributeRunsEnumerator = attributeRuns.objectEnumerator();
 
-      // print("Scaled font size = " + fontSize)
-      var fontParts = fontName.match(/(SF)([(UI)|(Pro)]+)\w+-([\w*]*)/);
-      log(fontParts);
+      while (attributeRun = attributeRunsEnumerator.nextObject()) {
+        var range = attributeRun.range();
+        var fontName = attributeRun.font().fontName();
+        var fontSize = attributeRun.fontSize();
+        fontSize = fontSize * (scale);
+        log("Font size" + fontSize);
+        var fontParts = fontName.match(/(SF)([(UI)|(Pro)]+)\w+-([\w*]*)/);
 
-      //Fmamily = SF, version = UI vs Pro, weight = Regular, Light, etc
-      var recommendedFamily, family = fontParts[1] + fontParts[2],
-        version = fontParts[2];
-      weight = fontParts[3];
-      // log("family: " + family);
+        var recommendedFamily, family = fontParts[1] + fontParts[2],
+          version = fontParts[2],
+          characterSpacing;
+        weight = fontParts[3];
 
-      //Font Should be SFUIDisplay for sizes over 40pt @72dpi
-      if (fontSize >= 40) {
-        recommendedFamily = "SF" + version + "Display";
-        fontSize = Math.min(160, Math.max(40, fontSize));
+        if (fontSize >= 40) {
+          recommendedFamily = "SF" + version + "Display";
+          fontSize = Math.min(160, Math.max(40, fontSize));
 
-      } else {
-        recommendedFamily = "SF" + version + "Text";
-        fontSize = Math.min(40, Math.max(12, fontSize));
+        } else {
+          recommendedFamily = "SF" + version + "Text";
+          fontSize = Math.min(40, Math.max(12, fontSize));
 
+        }
+
+        if (recommendedFamily != family) {
+          //textLayer.setFontPostscriptName(recommendedFamily + "-" + weight);
+          family = recommendedFamily;
+        }
+
+        //look up the value from the charts,  otherwise use the polynomial regression formulas
+        var spacing = trackingTable[family][fontSize];
+
+        // log("Before spacing: " + textLayer.characterSpacing())
+        if (spacing) {
+          characterSpacing = spacing * (1 / scale);
+        } else {
+          var interpolatedValue = fontSize >= 40 ? spacingForSFUIDisplay(fontSize) : spacingForSFUIText(fontSize);
+          characterSpacing = interpolatedValue * (1 / scale);
+        }
+
+        textStorage.addAttribute_value_range(NSFontAttributeName, NSFont.fontWithName_size(
+          family + "-" + weight, fontSize
+        ), range);
+
+        textStorage.addAttribute_value_range(NSKernAttributeName, characterSpacing, range);
+
+        var newAttributes = textStorage.fontAttributesInRange(range);
+        textLayer.setAttributes_forRange(newAttributes, range);
       }
-      if (recommendedFamily != family) {
-        textLayer.setFontPostscriptName(recommendedFamily + "-" + weight);
-        family = recommendedFamily;
-      }
 
-      //look up the value from the charts,  otherwise use the polynomial regression formulas
-      var spacing = trackingTable[family][fontSize];
-
-      // log("Before spacing: " + textLayer.characterSpacing())
-      if (spacing) {
-        textLayer.characterSpacing = spacing * (1 / scale);
-      } else {
-        var interpolatedValue = fontSize >= 40 ? spacingForSFUIDisplay(fontSize) : spacingForSFUIText(fontSize);
-        textLayer.characterSpacing = interpolatedValue * (1 / scale);
-      }
-      // log("After spacing: " + textLayer.characterSpacing())
-      //dunno but for some reason sketch's variable scoping seems whack. reset it here.
       spacing = undefined;
 
     }
@@ -218,7 +230,7 @@ var resolutionSetting = function() {
     cell.setTag(data.scale);
   });
   //select the last used scale
-   matrix.selectCellWithTag(userDefaults.scale)
+  matrix.selectCellWithTag(userDefaults.scale)
 
   [accessory addSubview: matrix]
 
