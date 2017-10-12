@@ -102,8 +102,8 @@ var onRun = function(context, scale) {
       while (attributeRun = attributeRunsEnumerator.nextObject()) {
         var range = attributeRun.range();
         var fontName = attributeRun.font().fontName();
-        var fontSize = attributeRun.fontSize();
-        fontSize = fontSize * (scale);
+        var oFontSize = attributeRun.fontSize();
+        fontSize = oFontSize * (scale);
         log("Font size" + fontSize);
         var fontParts = fontName.match(/(SF)([(UI)|(Pro)]+)\w+-([\w*]*)/);
 
@@ -139,7 +139,7 @@ var onRun = function(context, scale) {
         }
 
         textStorage.addAttribute_value_range(NSFontAttributeName, NSFont.fontWithName_size(
-          family + "-" + weight, fontSize
+          family + "-" + weight, oFontSize
         ), range);
 
         textStorage.addAttribute_value_range(NSKernAttributeName, characterSpacing, range);
